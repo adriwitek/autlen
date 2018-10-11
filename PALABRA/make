@@ -1,0 +1,8 @@
+all: palabra.o test
+
+
+
+palabra.o: palabra.c palabra.h
+	gcc -c palabra.c palabra.h 
+test: palabra.o test.c
+	gcc test.c palabra.o -o test
