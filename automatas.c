@@ -19,6 +19,9 @@ int main(int argc, char ** argv )
 
     AFNDImprime(stdout, p_afnd_l);
 
+    AFNDProcesaEntrada(stdout, p_afnd_l);
+
+
     AFNDElimina(p_afnd_l);
 
     return 0;
