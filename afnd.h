@@ -14,7 +14,7 @@ typedef struct _AFND
     int num_estados_actual;
     int num_simbolos;
     Estado ** estados;
-    Estado * estado_actual;
+    Estado ** estado_actuales;
     Palabra * cadena_actual;
     //int contador;
     VectorIndices ** ftransicion;
@@ -39,6 +39,10 @@ AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo);
 AFND * AFNDInsertaEstado(AFND * p_afnd, char * nombre, int tipo);
 AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra);
 AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombre_simbolo_entrada, char * nombre_estado_f );
+void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd);
+
+AFND * AFNDInicializaCadenaActual (AFND * p_afnd );
+AFND * AFNDInicializaEstado (AFND * p_afnd);
 
 
 #endif //AFND_H

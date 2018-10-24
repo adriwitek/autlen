@@ -26,6 +26,9 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
     a->estados = (Estado**)malloc(sizeof(Estado*)*num_estados);
     if (!a->estados) ERR("malloc");
 
+    a->estado_actuales = (Estado**)malloc(sizeof(Estado*)*num_estados);
+    if (!a->estado_actuales) ERR("malloc");
+
     a->cadena_actual = palabraNueva();
     if(!a->cadena_actual) ERR("error al reservar la palabra nueva");
     //a->contador = 0;
@@ -131,12 +134,13 @@ int AFNDIndiceDeSimbolo(AFND * p_afnd,char * nombre){
 
 AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i,  char * nombre_simbolo_entrada,  char * nombre_estado_f ){
     int pos_qi,pos_qf,pos_simbolo;
-    if(!p_afnd || nombre_estado_f || nombre_estado_i || nombre_estado_f ) ERR("error al insertar transiccion");
+    if(!p_afnd || !nombre_estado_f || !nombre_estado_i || !nombre_estado_f ) ERR("error al insertar transiccion");
     pos_qi= AFNDIndiceDeEstado( p_afnd,nombre_estado_i);
     pos_qf= AFNDIndiceDeEstado( p_afnd,nombre_estado_f);
     pos_simbolo = AFNDIndiceDeSimbolo(p_afnd,nombre_simbolo_entrada);
     if(pos_qi == -1 || pos_qf == -1 || pos_simbolo == -1) ERR("ERRO AL INSETAR LA TRANSICION");
     (p_afnd->ftransicion[pos_qi][pos_simbolo])[pos_qf]=1;
+    return p_afnd;
 }
 AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo)
 {
@@ -173,4 +177,19 @@ AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra)
     return p_afnd;
 }
 
+//AFND * AFNDInicializaCadenaActual (AFND * p_afnd );
+AFND * AFNDInicializaEstado (AFND * p_afnd){
+    if(!p_afnd)ERR("inicializando estado");
 
+     for(int i = 0; i < p_afnd->num_estados; i++){
+
+        if(estadoTipo(p_afnd->estados[0]) == INICIAL){
+            p_afnd->estado_actuales[0] = p_afnd->estados[i];
+            //p_afnd->num_estados_actual ++;
+            return p_afnd;
+        }
+    }
+    
+    return NULL;
+
+}
