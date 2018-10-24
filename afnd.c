@@ -40,8 +40,10 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
 
     /* MATRIZ DE TRANSICCION */
     a->ftransicion = (VectorIndices **)malloc(sizeof(VectorIndices*)*num_simbolos);
+    if (!a->ftransicion) ERR("malloc");
     for (i=0; i<num_estados; i++){
 		a->ftransicion[i] = (VectorIndices*) malloc (num_estados*sizeof(VectorIndices)); 
+        if (!a->ftransicion[i]) ERR("malloc");
 	}
 	for (i=0; i < num_estados ; i++){
 		for (j=0; j < num_simbolos; j++){
@@ -62,6 +64,18 @@ void AFNDElimina(AFND * p_afnd)
         estadoElimina(p_afnd->estados[i]);
     }
     palabraElimina(p_afnd->cadena_actual);
+
+    for (i=0; i < p_afnd->num_estados ; i++){
+		for (j=0; j < p_afnd->num_simbolos; j++){
+			VectorIndicesElimina(p_afnd->ftransicion[i][j]);
+		}
+	}
+
+    for (i=0; i<p_afnd->num_estados; i++){
+		free(p_afnd->ftransicion[i]);
+	}
+    free(p_afnd->ftransicion);
+
     free(p_afnd->estados);
     free(p_afnd);
 }
@@ -112,16 +126,16 @@ void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
         fprintf(fd, "\n ");
         
         letraux = palabraQuitaInicio(p_afnd->cadena_actual);
+        //
         free(letraux);
-    }
-    
+    }   
 }
 
 
 int AFNDIndiceDeEstado(AFND * p_afnd,char * nombre){
     if(!p_afnd || !nombre) ERR("mal indice");
     for(int i =0;i <p_afnd->num_estados ;i++){
-        if(strcmp(nombre, estadoNombre(p_afnd->estados[i])  ) == 0 ){
+        if(estadoEs(nombre, estadoNombre(p_afnd->estados[i])  ) == 1 ){
             return i;
         }
     }
@@ -139,7 +153,7 @@ AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i,  char * nomb
     pos_qf= AFNDIndiceDeEstado( p_afnd,nombre_estado_f);
     pos_simbolo = AFNDIndiceDeSimbolo(p_afnd,nombre_simbolo_entrada);
     if(pos_qi == -1 || pos_qf == -1 || pos_simbolo == -1) ERR("ERRO AL INSETAR LA TRANSICION");
-    (p_afnd->ftransicion[pos_qi][pos_simbolo])[pos_qf]=1;
+    VectorIndicesSetI(p_afnd->ftransicion[pos_qi][pos_simbolo],pos_qf);
     return p_afnd;
 }
 AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo)
