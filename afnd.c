@@ -18,6 +18,7 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos)
     strcpy(a->nombre,nombre);
     a->alfabeto = alfabetoNuevo(nombre, num_simbolos);
     a->num_estados = num_estados;
+    a->num_estados_actual = 0;
     a->num_simbolos = num_simbolos;
 
     a->estados = (Estado**)malloc(sizeof(Estado*)*num_estados);
@@ -25,10 +26,6 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos)
 
     a->cadena_actual = palabraNueva();
 
-    // for (int i=0; i<num_estados; i++)
-    // {
-    //     a->estados[i]=estadoNuevo("test",3);
-    // }
     return a;
 }
 
@@ -43,16 +40,6 @@ void AFNDElimina(AFND * p_afnd)
     palabraElimina(p_afnd->cadena_actual);
     free(p_afnd->estados);
     free(p_afnd);
-}
-
-AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra)
-{
-    if (!p_afnd) ERR("afnd is null");
-    if (!letra) ERR("letra is null");
-
-    p_afnd->cadena_actual = palabraInsertaLetra(p_afnd->cadena_actual, letra);
-
-    return p_afnd;
 }
 
 void AFNDImprime(FILE * fd, AFND* p_afnd)
@@ -73,4 +60,46 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
     // fprintf(fd,"}\n\n\tFuncion de Transicion ={\n\n");
     // fprintf(fd,"\t\tnot implemented yet\n\n\n");
     fprintf(fd,"\t}\n}\n\n");
+}
+
+AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo)
+{
+    if (!p_afnd) ERR("AFND is null");
+    if (!simbolo) ERR("inserted symbol is null");
+
+    p_afnd->alfabeto = alfabetoInsertaSimbolo(p_afnd->alfabeto, simbolo);
+
+    return p_afnd;
+}
+
+AFND * AFNDInsertaEstado(AFND * p_afnd, char * nombre, int tipo)
+{
+    if (!p_afnd) ERR("AFND is null");
+    if (!nombre) ERR("nombre is null");
+
+    int len = p_afnd->num_estados_actual;
+    if (len<p_afnd->num_estados)
+    {
+        p_afnd->estados[len] = estadoNuevo(nombre, tipo);
+        p_afnd->num_estados_actual++;
+    }
+    else ERR("exceeded number of possible states");
+    return p_afnd;
+}
+
+AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra)
+{
+    if (!p_afnd) ERR("afnd is null");
+    if (!letra) ERR("letra is null");
+
+    p_afnd->cadena_actual = palabraInsertaLetra(p_afnd->cadena_actual, letra);
+
+    return p_afnd;
+}
+
+AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombre_simbolo_entrada, char * nombre_estado_f )
+{
+
+
+    return p_afnd;
 }
