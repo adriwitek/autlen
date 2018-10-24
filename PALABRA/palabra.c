@@ -12,7 +12,7 @@ Palabra * palabraNueva(){
     if(! p->letras){
         return NULL;
         }
-        printf("debug1");
+        //printf("debug1");
     return p;
 }
 
@@ -37,28 +37,32 @@ Palabra * palabraInsertaLetra(Palabra * p_p, char * letra){
    
 
   
-       printf("debug2");
-      char** ptr  = (char **) realloc(p_p->letras, p_p->tam + 1);
+      
+     
+      char** ptr  = (char **) realloc(p_p->letras, (p_p->tam + 1)* sizeof(char *) );
       if(!ptr) return NULL;
       p_p->letras = ptr;
-      p_p->letras[p_p->tam] = (char*)malloc(strlen(letra) * sizeof(char));
+      p_p->letras[p_p->tam] = (char*)malloc(strlen(letra) +1 );
       if(! p_p->letras[p_p->tam] ){return NULL;}
       strcpy(p_p->letras[p_p->tam], letra);
-      printf("%s \n",p_p->letras[p_p->tam]);
-    p_p->tam++;
-    printf("changing size from %d to %d \n",p_p->tam-1,p_p->tam );
+      //printf("letra : %s \n",p_p->letras[p_p->tam]);
+       p_p->tam++;
+   
     return p_p;
 
 }
 
 void palabraImprime(FILE * fd, Palabra * p_p){
-    if(!fd || p_p){
+    if(fd==NULL || p_p==NULL){
+        printf("Error de puntero,funcion imprime_palabra\n");
         return;
     }
+    fprintf(fd,"[(%d) ",p_p->tam);
     for(int i=0;i< p_p->tam ;i++){
-        fprintf(fd,"%s",p_p->letras[i]);
+        fprintf(fd,"%s ",p_p->letras[i]);
+        
     }
-    fprintf(fd,"\n");
+    fprintf(fd,"] \n");
     return;
     
 }
