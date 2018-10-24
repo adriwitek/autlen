@@ -1,7 +1,6 @@
 #ifndef PALABRA_H
 #define PALABRA_H
 
-#define TAM_MAX 50
 typedef struct _Palabra{
     int tam;
     char** letras;

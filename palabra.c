@@ -36,22 +36,19 @@ void palabraElimina(Palabra * p_p){
 }
 
 Palabra * palabraInsertaLetra(Palabra * p_p, char * letra){
-       //printf("debug2");
       char** ptr  = (char **) realloc(p_p->letras, (p_p->tam + 1)*sizeof(char*));
       if(!ptr) ERR("malloc");
       p_p->letras = ptr;
       p_p->letras[p_p->tam] = (char*)malloc(strlen(letra) * sizeof(char));
       if(! p_p->letras[p_p->tam] ) ERR("malloc");
       strcpy(p_p->letras[p_p->tam], letra);
-      //printf("%s \n",p_p->letras[p_p->tam]);
         p_p->tam++;
-   // printf("changing size from %d to %d \n",p_p->tam-1,p_p->tam );
     return p_p;
 }
 
 void palabraImprime(FILE * fd, Palabra * p_p){
     if(!fd || !p_p){
-        return;
+        ERR("Error de puntero,funcion imprime_palabra\n");
     }
     printf("[(%d)",p_p->tam);
     for(int i=0;i< p_p->tam ;i++){
