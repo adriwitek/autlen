@@ -18,7 +18,7 @@ VectorIndices VectorIndicesNuevo(int tamano)
 
 void VectorIndicesElimina(VectorIndices vi)
 {
-	if (vi) free(vi);
+	free(vi);
 }
 
 void VectorIndicesImprime(FILE * fd, VectorIndices vi, int tamano)
@@ -29,6 +29,7 @@ void VectorIndicesImprime(FILE * fd, VectorIndices vi, int tamano)
 	{
 		fprintf(fd,"%d", vi[i]);
 	}
+	fprintf(fd,"\n");
 }
 
 void VectorIndicesSetI(VectorIndices vi, int i)

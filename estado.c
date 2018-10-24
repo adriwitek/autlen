@@ -25,7 +25,7 @@ Estado * estadoNuevo( char * nombre, int tipo)
 
 void estadoElimina( Estado * p_s)
 {
-    if (!p_s) ERR("estado is NULL");
+    if (!p_s) return;
 
     free(p_s->nombre);
     free(p_s);

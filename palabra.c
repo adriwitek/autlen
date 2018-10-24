@@ -1,32 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "palabra.h"
 
+#define ERR(source) (perror(source),\
+		     fprintf(stderr,"%s:%d\n",__FILE__,__LINE__),\
+		     exit(EXIT_FAILURE))
 
 Palabra * palabraNueva(){
     Palabra *p;
     p = (Palabra*)malloc(sizeof(Palabra));
     if(p == NULL){
-        return NULL;
+        ERR("malloc");
     }
     p->tam = 0;
-    p->letras =  (char**)   malloc(TAM_MAX * sizeof(char*)); 
+    p->letras =  (char**)malloc(sizeof(char*)); 
     if(! p->letras){
-        return NULL;
+        ERR("malloc");
         }
-     for(int i = 0;   i<=TAM_MAX;i++)  {
-         p->letras[i] = (char *)malloc(sizeof(char));
-         if( p->letras[i] == NULL){
-             for(int j=0;j<i;j++){
-                 free(p->letras[i]);
-             }
-             free(p->letras);
-             return NULL;
-         }
-     }
     return p;
 }
-
-
-
 
 void palabraElimina(Palabra * p_p){
     if(p_p == NULL){
@@ -43,43 +36,28 @@ void palabraElimina(Palabra * p_p){
 }
 
 Palabra * palabraInsertaLetra(Palabra * p_p, char * letra){
-    char *copia;
-
-    if(    p_p->tam >= TAM_MAX){
-      
-      p_p->letras = (char **) realloc(p_p->letras, p_p->tam + 1);
-       p_p->tam++;
-       p_p->letras[ p_p->tam - 1] = (char*)malloc(sizeof(char) );
-       if( p_p->letras[ p_p->tam - 1] == NULL){return NULL;}
-
-    }
-
-    /*movemos cda letra una posicion a la derecha en el array*/
-    for(int j = p_p->tam - 1; j>=0 ;j--){
-        if(j != 0){
-             p_p->letras[j] =  p_p->letras[j -1];
-        }
-    }
-
-    copia = (char*) malloc(sizeof(char));
-    if(!copia){
-        return NULL;
-    }
-
-    *copia = *letra;
-    p_p->letras[0] = copia; /*Insetamos en la primera posicion*/
+       //printf("debug2");
+      char** ptr  = (char **) realloc(p_p->letras, (p_p->tam + 1)*sizeof(char*));
+      if(!ptr) ERR("malloc");
+      p_p->letras = ptr;
+      p_p->letras[p_p->tam] = (char*)malloc(strlen(letra) * sizeof(char));
+      if(! p_p->letras[p_p->tam] ) ERR("malloc");
+      strcpy(p_p->letras[p_p->tam], letra);
+      //printf("%s \n",p_p->letras[p_p->tam]);
+        p_p->tam++;
+   // printf("changing size from %d to %d \n",p_p->tam-1,p_p->tam );
     return p_p;
-
 }
 
 void palabraImprime(FILE * fd, Palabra * p_p){
-    if(!fd || p_p){
+    if(!fd || !p_p){
         return;
     }
+    printf("[(%d)",p_p->tam);
     for(int i=0;i< p_p->tam ;i++){
-        fprintf(fd,"%s",p_p->letras[i]);
+        fprintf(fd," %s",p_p->letras[i]);
     }
-    fprintf(fd,"\n");
+    fprintf(fd,"]\n");
     return;
     
 }
@@ -87,19 +65,50 @@ void palabraImprime(FILE * fd, Palabra * p_p){
 char * palabraQuitaInicio(Palabra * p_p){
     char *copia;
     if(!p_p){
+        ERR("no palabra");
+    }
+    if (!p_p->letras)
+    {
+        ERR("letras uninitialized");
+    }
+    if (p_p->tam == 0)
+    {
         return NULL;
     }
      copia = p_p->letras[0];
+
     for(int i=0;i<p_p->tam;i++){
         p_p->letras[i] = p_p->letras[i+1];
     }
-    
-    //strcpy(p_p->letras[p_p->tam - 1],"\n");
-    p_p->letras[p_p->tam - 1]='\0';
-     p_p->tam--;
-    return copia;
 
+    p_p->tam--;
+    if (p_p->tam>0)
+    {
+        char** ptr  = (char **) realloc(p_p->letras, (p_p->tam)*sizeof(char*));
+        if(!ptr) ERR("malloc");
+        p_p->letras = ptr;
+    }
+    else p_p = palabraNueva();
+      
+    return copia;
 }
+
+// char * palabraQuitaInicio(Palabra * p_p){
+//     char *copia;
+//     if(!p_p){
+//         ERR("no palabra");
+//     }
+//      copia = p_p->letras[0];
+//     for(int i=0;i<p_p->tam;i++){
+//         p_p->letras[i] = p_p->letras[i+1];
+//     }
+    
+//     //strcpy(p_p->letras[p_p->tam - 1],"\n");
+//     p_p->letras[p_p->tam - 1]='\0';
+//      p_p->tam--;
+//     return copia;
+// }
+
 int palabraTamano(Palabra * p_p){
     if(!p_p){
         return -1;
