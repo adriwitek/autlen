@@ -20,6 +20,7 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
 
     a->alfabeto = alfabetoNuevo(nombre, num_simbolos);
     a->num_estados = num_estados;
+    a->num_estados_actual = 0;
     a->num_simbolos = num_simbolos;
 
     a->estados = (Estado**)malloc(sizeof(Estado*)*num_estados);
@@ -60,18 +61,6 @@ void AFNDElimina(AFND * p_afnd)
     palabraElimina(p_afnd->cadena_actual);
     free(p_afnd->estados);
     free(p_afnd);
-}
-
-AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra)
-{
-    if (!p_afnd) ERR("afnd is null");
-    if (!letra) ERR("letra is null");
-
-    p_afnd->cadena_actual = palabraInsertaLetra(p_afnd->cadena_actual, letra);
-    if(!p_afnd){
-        return NULL;
-    }
-    return p_afnd;
 }
 
 void AFNDImprime(FILE * fd, AFND* p_afnd)
@@ -149,3 +138,39 @@ AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i,  char * nomb
     if(pos_qi == -1 || pos_qf == -1 || pos_simbolo == -1) ERR("ERRO AL INSETAR LA TRANSICION");
     (p_afnd->ftransicion[pos_qi][pos_simbolo])[pos_qf]=1;
 }
+AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo)
+{
+    if (!p_afnd) ERR("AFND is null");
+    if (!simbolo) ERR("inserted symbol is null");
+
+    p_afnd->alfabeto = alfabetoInsertaSimbolo(p_afnd->alfabeto, simbolo);
+
+    return p_afnd;
+}
+
+AFND * AFNDInsertaEstado(AFND * p_afnd, char * nombre, int tipo)
+{
+    if (!p_afnd) ERR("AFND is null");
+    if (!nombre) ERR("nombre is null");
+
+    int len = p_afnd->num_estados_actual;
+    if (len<p_afnd->num_estados)
+    {
+        p_afnd->estados[len] = estadoNuevo(nombre, tipo);
+        p_afnd->num_estados_actual++;
+    }
+    else ERR("exceeded number of possible states");
+    return p_afnd;
+}
+
+AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra)
+{
+    if (!p_afnd) ERR("afnd is null");
+    if (!letra) ERR("letra is null");
+
+    p_afnd->cadena_actual = palabraInsertaLetra(p_afnd->cadena_actual, letra);
+
+    return p_afnd;
+}
+
+
