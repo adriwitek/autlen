@@ -42,5 +42,6 @@ AFND * AFNDInicializaEstado (AFND * p_afnd);
 void AFNDInsertaEstado_Actual(AFND * p_afnd, int indice);
 void AFNDTransita(AFND * p_afnd);
 int AFND_VectorIndicesVacio(AFND * p_afnd );
-
+void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd);
+void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd);
 #endif //AFND_H

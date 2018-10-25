@@ -123,33 +123,16 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
 
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
     
-    int i = 0;
-    int size;
-    char *letraux;
     
-    if(  fd == NULL || p_afnd == NULL ){
-        ERR("ANFDProcesarEntrada");
+AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
+AFNDImprimeCadenaActual(fd,p_afnd);
+while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio( p_afnd ) ){ /*Minetras queden caracterres y haya estados actuales:*/
+        AFNDTransita(p_afnd);
+        AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
+        AFNDImprimeCadenaActual(fd,p_afnd);
     }
+
     
-    size = palabraTamano(p_afnd->cadena_actual);
-    
-    fprintf(fd, "\n\n");
-    fprintf(fd, ">>>>PROCESANDO CADENA: \n \n");
-    fprintf(fd, "\t");
-    palabraImprime(fd,p_afnd->cadena_actual);
-    fprintf(fd, "\n \n \n");
-    
-    for(i=0; i<=size; i++){
-        
-        fprintf(fd,"----Poscion Numero: %d  \n", i);
-        fprintf(fd, "\t");
-        palabraImprime(fd,p_afnd->cadena_actual);
-        fprintf(fd, "\n ");
-        
-        letraux = palabraQuitaInicio(p_afnd->cadena_actual);
-        //
-        free(letraux);
-    }   
 }
 
 
