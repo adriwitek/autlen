@@ -123,17 +123,6 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
 
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
     
-<<<<<<< HEAD
-AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
-AFNDImprimeCadenaActual(fd,p_afnd);
-while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio( p_afnd ) ){ /*Minetras queden caracterres y haya estados actuales:*/
-        AFNDTransita(p_afnd);
-        AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
-        AFNDImprimeCadenaActual(fd,p_afnd);
-    }
-
-    
-=======
     int i = 0;
     int size;
     char *letraux;
@@ -161,7 +150,6 @@ while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio
         //
         free(letraux);
     }   
->>>>>>> 353eb0c3c1b0aeb8c1cb719ed8493d062516d907
 }
 
 
@@ -246,7 +234,7 @@ void AFNDInsertaEstado_Actual(AFND * p_afnd, int indice){
 
     for(int k=0;  k<p_afnd->num_estados;  k++){
         if(p_afnd->estado_actuales[k] == NULL){
-            p_afnd->estado_actuales[k] == p_afnd->estados[indice];
+            p_afnd->estado_actuales[k] = p_afnd->estados[indice];
             p_afnd->num_estados_actuales_paralelos++;
             return;
         }
@@ -301,7 +289,7 @@ void AFNDTransita(AFND * p_afnd){
         
         indice_fila = AFNDIndiceDeEstado(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));
         indice_col  = AFNDIndiceDeSimbolo(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));
-        p_afnd->estado_actuales[i] == NULL; /*Lo saco ya que al transitar saldre de ese estado(si no asi se inserta a si mismo en el bucle de abajo)*/
+        p_afnd->estado_actuales[i] = NULL; /*Lo saco ya que al transitar saldre de ese estado(si no asi se inserta a si mismo en el bucle de abajo)*/
         p_afnd->num_estados_actuales_paralelos--;
 
 
@@ -330,9 +318,7 @@ void AFNDTransita(AFND * p_afnd){
 }
 
 
-<<<<<<< HEAD
-=======
-}
+
 
 void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd)
 {
@@ -352,4 +338,3 @@ void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd)
 
     palabraImprime(fd, p_afnd->cadena_actual);
 }
->>>>>>> 353eb0c3c1b0aeb8c1cb719ed8493d062516d907
