@@ -47,7 +47,7 @@ int main(int argc, char ** argv )
    p_afnd= AFNDInsertaLetra(p_afnd,"1");
    p_afnd= AFNDInsertaLetra(p_afnd,"1");
 
- AFNDInicializaEstado (p_afnd);
+   AFNDInicializaEstado (p_afnd);
 
 
     AFNDElimina(p_afnd);
