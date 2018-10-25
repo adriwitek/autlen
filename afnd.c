@@ -44,17 +44,20 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
     
 
     /* MATRIZ DE TRANSICCION */
-    a->ftransicion = (VectorIndices **)malloc(sizeof(VectorIndices*)*num_simbolos);
-    if (!a->ftransicion) ERR("malloc");
-    for (i=0; i<num_estados; i++){
-		a->ftransicion[i] = (VectorIndices*) malloc (num_estados*sizeof(VectorIndices)); 
-        if (!a->ftransicion[i]) ERR("malloc");
-	}
-	for (i=0; i < num_estados ; i++){
-		for (j=0; j < num_simbolos; j++){
-			a->ftransicion[i][j]= VectorIndicesNuevo(num_estados);
-		}
-	}
+    a->ftransicion = (VectorIndices**) malloc (num_estados*sizeof(VectorIndices*));
+    for (i=0; i<num_estados; i++)
+    {
+        a->ftransicion[i] = (VectorIndices*) malloc (num_simbolos*sizeof(VectorIndices)); 
+    }
+
+    for (i=0; i < num_estados ; i++)
+    {
+        for (j=0; j < num_simbolos; j++)
+        {
+            a->ftransicion[i][j]= VectorIndicesNuevo(num_estados);
+        }
+    }
+
 
 
     return a;
@@ -108,6 +111,7 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
             fprintf(fd,"f(%s",p_afnd->estados[i]->nombre);
             //estadoImprime(fd, p_afnd->estados[i]);
             fprintf(fd,",%s)={",p_afnd->alfabeto->simbolos[j]);
+           
             for (int k=0;k<p_afnd->num_estados; k++)
             {
                 if (VectorIndicesGetI(p_afnd->ftransicion[i][j],k)==1)
@@ -124,11 +128,15 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
     
     
-AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
+
+
 AFNDImprimeCadenaActual(fd,p_afnd);
 while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio( p_afnd ) ){ /*Minetras queden caracterres y haya estados actuales:*/
+        
         AFNDTransita(p_afnd);
-        AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
+       
+
+       /AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
         AFNDImprimeCadenaActual(fd,p_afnd);
     }
 
@@ -199,6 +207,7 @@ AFND * AFNDInicializaEstado (AFND * p_afnd){
      for(int i = 0; i < p_afnd->num_estados; i++){
 
         if(estadoTipo(p_afnd->estados[i]) == INICIAL){
+        
             p_afnd->estado_actuales[p_afnd->num_estados_actuales_paralelos] = p_afnd->estados[i];
             p_afnd->num_estados_actuales_paralelos ++;
         }
@@ -271,18 +280,21 @@ void AFNDTransita(AFND * p_afnd){
         
         
         indice_fila = AFNDIndiceDeEstado(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));
-        indice_col  = AFNDIndiceDeSimbolo(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));
+        indice_col  = AFNDIndiceDeSimbolo(p_afnd,entrada);
         p_afnd->estado_actuales[i] = NULL; /*Lo saco ya que al transitar saldre de ese estado(si no asi se inserta a si mismo en el bucle de abajo)*/
         p_afnd->num_estados_actuales_paralelos--;
 
 
         for(int j=0;j < p_afnd->num_estados_actual;j++){
-            if( 1 ==  (p_afnd->ftransicion[indice_fila][indice_col])[j]   ){/*Transitamos*/ /*j es el indice del estadoa  transitar*/
-                 AFNDInsertaEstado_Actual( p_afnd, j);
+            
+            if( 1 ==  VectorIndicesGetI(p_afnd->ftransicion[indice_fila][indice_col], j)   ){/*Transitamos*/ /*j es el indice del estadoa  transitar*/
+                 //AFNDInsertaEstado_Actual( p_afnd, j);
+                  p_afnd->estado_actuales[p_afnd->num_estados_actuales_paralelos  ] = p_afnd->estados[j];
+                  p_afnd->num_estados_actuales_paralelos++;
             }  
         }
     }
-
+    
     /*Recolocamos  p_afnd->estado_actuales para que no queden nulls arriba*/
     Estado ** estado_actuales_copy;
     p_afnd->estado_actuales = (Estado**)malloc(sizeof(Estado*)* p_afnd->num_estados);
@@ -303,6 +315,7 @@ void AFNDTransita(AFND * p_afnd){
 
 
 
+
 void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd)
 {
     if (!fd) ERR("problem with file descriptor");
@@ -310,7 +323,11 @@ void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd)
 
     for (int i=0; i<p_afnd->num_estados_actual;i++)
     {
-        estadoImprime(fd, p_afnd->estado_actuales[i]);
+        //if(p_afnd->estado_actuales[i] != NULL){
+        //     estadoImprime(fd, p_afnd->estado_actuales[i]);
+        //}
+       
+       
     }
 }
 
