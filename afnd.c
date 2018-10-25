@@ -65,13 +65,13 @@ void AFNDElimina(AFND * p_afnd)
     }
     palabraElimina(p_afnd->cadena_actual);
 
-    for (i=0; i < p_afnd->num_estados ; i++){
-		for (j=0; j < p_afnd->num_simbolos; j++){
+    for (int i=0; i < p_afnd->num_estados ; i++){
+		for (int j=0; j < p_afnd->num_simbolos; j++){
 			VectorIndicesElimina(p_afnd->ftransicion[i][j]);
 		}
 	}
 
-    for (i=0; i<p_afnd->num_estados; i++){
+    for (int i=0; i<p_afnd->num_estados; i++){
 		free(p_afnd->ftransicion[i]);
 	}
     free(p_afnd->ftransicion);
@@ -91,12 +91,27 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
     alfabetoImprime(fd, p_afnd->alfabeto);
     fprintf(fd,"\n\tnum_estados = %d\n\n",p_afnd->num_estados);
     fprintf(fd,"\tQ={");
-    // for (int i=0; i<p_afnd->num_estados; i++)
-    // {
-    //     estadoImprime(fd, p_afnd->estados[i]);
-    // }
-    // fprintf(fd,"}\n\n\tFuncion de Transicion ={\n\n");
-    // fprintf(fd,"\t\tnot implemented yet\n\n\n");
+    for (int i=0; i<p_afnd->num_estados; i++)
+    {
+        estadoImprime(fd, p_afnd->estados[i]);
+    }
+    fprintf(fd,"}\n\n\tFuncion de Transicion = {\n\n");
+    for (int i=0; i < p_afnd->num_estados ; i++){
+		for (int j=0; j < p_afnd->num_simbolos; j++){
+			fprintf(fd,"\t\t");
+            fprintf(fd,"f(%s",p_afnd->estados[i]->nombre);
+            //estadoImprime(fd, p_afnd->estados[i]);
+            fprintf(fd,",%s)={",p_afnd->alfabeto->simbolos[j]);
+            for (int k=0;k<p_afnd->num_estados; k++)
+            {
+                if (VectorIndicesGetI(p_afnd->ftransicion[i][j],k)==1)
+                {
+                    fprintf(fd," %s",p_afnd->estados[k]->nombre);
+                }
+            }
+            fprintf(fd," }\n");
+		}
+	}
     fprintf(fd,"\t}\n}\n\n");
 }
 
@@ -135,7 +150,7 @@ void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
 int AFNDIndiceDeEstado(AFND * p_afnd,char * nombre){
     if(!p_afnd || !nombre) ERR("mal indice");
     for(int i =0;i <p_afnd->num_estados ;i++){
-        if(estadoEs(nombre, estadoNombre(p_afnd->estados[i])  ) == 1 ){
+        if(strcmp(nombre, estadoNombre(p_afnd->estados[i])  ) == 0 ){
             return i;
         }
     }
@@ -206,4 +221,23 @@ AFND * AFNDInicializaEstado (AFND * p_afnd){
     
     return NULL;
 
+}
+
+void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd)
+{
+    if (!fd) ERR("problem with file descriptor");
+    if (!p_afnd) ERR("AFND is NULL");
+
+    for (int i=0; i<p_afnd->num_estados_actual;i++)
+    {
+        estadoImprime(fd, p_afnd->estado_actuales[i]);
+    }
+}
+
+void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd)
+{
+    if (!fd) ERR("problem with file descriptor");
+    if (!p_afnd) ERR("AFND is NULL");
+
+    palabraImprime(fd, p_afnd->cadena_actual);
 }

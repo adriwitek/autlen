@@ -37,6 +37,7 @@ void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd);
 
 AFND * AFNDInicializaCadenaActual (AFND * p_afnd );
 AFND * AFNDInicializaEstado (AFND * p_afnd);
-
+void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd);
+void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd);
 
 #endif //AFND_H
