@@ -11,7 +11,8 @@ typedef struct _AFND
     char * nombre;
     Alfabeto * alfabeto;
     int num_estados;
-    int num_estados_actual;
+    int num_estados_actual; /*numero de estados INSERTADOS*/
+    int num_estados_actuales_paralelos;
     int num_simbolos;
     Estado ** estados;
     Estado ** estado_actuales;
@@ -44,5 +45,8 @@ void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd);
 AFND * AFNDInicializaCadenaActual (AFND * p_afnd );
 AFND * AFNDInicializaEstado (AFND * p_afnd);
 
+void AFNDInsertaEstado_Actual(AFND * p_afnd, int indice);
+void AFNDTransita(AFND * p_afnd);
+int AFND_VectorIndicesVacio(AFND * p_afnd );
 
 #endif //AFND_H

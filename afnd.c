@@ -26,8 +26,13 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
     a->estados = (Estado**)malloc(sizeof(Estado*)*num_estados);
     if (!a->estados) ERR("malloc");
 
+
+    /*Para el no determinismo:*/
+    a->num_estados_actuales_paralelos = 0;
     a->estado_actuales = (Estado**)malloc(sizeof(Estado*)*num_estados);
     if (!a->estado_actuales) ERR("malloc");
+
+
 
     a->cadena_actual = palabraNueva();
     if(!a->cadena_actual) ERR("error al reservar la palabra nueva");
@@ -63,6 +68,7 @@ void AFNDElimina(AFND * p_afnd)
     }
     palabraElimina(p_afnd->cadena_actual);
     free(p_afnd->estados);
+    free(p_afnd->estado_actuales);
     free(p_afnd);
 }
 
@@ -88,49 +94,18 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
 
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
     
-    int i = 0;
-    int size;
-    char *letraux;
-    
-    if(  fd == NULL || p_afnd == NULL ){
-        ERR("ANFDProcesarEntrada");
+AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
+AFNDImprimeCadenaActual(fd,p_afnd);
+while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio( p_afnd ) ){ /*Minetras queden caracterres y haya estados actuales:*/
+        AFNDTransita(p_afnd);
+        AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
+        AFNDImprimeCadenaActual(fd,p_afnd);
     }
-    
-    size = palabraTamano(p_afnd->cadena_actual);
-    
-    fprintf(fd, "\n\n");
-    fprintf(fd, ">>>>PROCESANDO CADENA: \n \n");
-    fprintf(fd, "\t");
-    palabraImprime(fd,p_afnd->cadena_actual);
-    fprintf(fd, "\n \n \n");
-    
-    for(i=0; i<=size; i++){
-        
-        fprintf(fd,"----Poscion Numero: %d  \n", i);
-        fprintf(fd, "\t");
-        palabraImprime(fd,p_afnd->cadena_actual);
-        fprintf(fd, "\n ");
-        
-        letraux = palabraQuitaInicio(p_afnd->cadena_actual);
-        free(letraux);
-    }
+
     
 }
 
 
-int AFNDIndiceDeEstado(AFND * p_afnd,char * nombre){
-    if(!p_afnd || !nombre) ERR("mal indice");
-    for(int i =0;i <p_afnd->num_estados ;i++){
-        if(strcmp(nombre, estadoNombre(p_afnd->estados[i])  ) == 0 ){
-            return i;
-        }
-    }
-    return -1;
-}
-int AFNDIndiceDeSimbolo(AFND * p_afnd,char * nombre){
-     if(!p_afnd || !nombre) ERR("mal indice");
-     return alfabetoIndiceDeSimbolo(p_afnd->alfabeto,  nombre);
-}
 
 AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i,  char * nombre_simbolo_entrada,  char * nombre_estado_f ){
     int pos_qi,pos_qf,pos_simbolo;
@@ -152,14 +127,12 @@ AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo)
     return p_afnd;
 }
 
-AFND * AFNDInsertaEstado(AFND * p_afnd, char * nombre, int tipo)
-{
+AFND * AFNDInsertaEstado(AFND * p_afnd, char * nombre, int tipo){
     if (!p_afnd) ERR("AFND is null");
     if (!nombre) ERR("nombre is null");
 
     int len = p_afnd->num_estados_actual;
-    if (len<p_afnd->num_estados)
-    {
+    if (len<p_afnd->num_estados){
         p_afnd->estados[len] = estadoNuevo(nombre, tipo);
         p_afnd->num_estados_actual++;
     }
@@ -167,8 +140,7 @@ AFND * AFNDInsertaEstado(AFND * p_afnd, char * nombre, int tipo)
     return p_afnd;
 }
 
-AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra)
-{
+AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra){
     if (!p_afnd) ERR("afnd is null");
     if (!letra) ERR("letra is null");
 
@@ -177,19 +149,125 @@ AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra)
     return p_afnd;
 }
 
-//AFND * AFNDInicializaCadenaActual (AFND * p_afnd );
+/*Reset of the machine*/
+AFND * AFNDInicializaCadenaActual (AFND * p_afnd ){
+     if(!p_afnd)ERR("error");
+     if(p_afnd->cadena_actual){
+          palabraElimina(p_afnd->cadena_actual);
+     }
+    p_afnd->cadena_actual = palabraNueva();
+    for(int i = 0;i<p_afnd->num_estados_actuales_paralelos   ;i++){
+        p_afnd->estado_actuales = NULL;
+    }
+
+    return p_afnd;
+}
+/*Inicializamos TODOS los estados de tipo INICIAL*/
 AFND * AFNDInicializaEstado (AFND * p_afnd){
     if(!p_afnd)ERR("inicializando estado");
 
      for(int i = 0; i < p_afnd->num_estados; i++){
 
-        if(estadoTipo(p_afnd->estados[0]) == INICIAL){
-            p_afnd->estado_actuales[0] = p_afnd->estados[i];
-            //p_afnd->num_estados_actual ++;
-            return p_afnd;
+        if(estadoTipo(p_afnd->estados[i]) == INICIAL){
+            p_afnd->estado_actuales[p_afnd->num_estados_actuales_paralelos] = p_afnd->estados[i];
+            p_afnd->num_estados_actuales_paralelos ++;
         }
     }
-    
-    return NULL;
+    return p_afnd;
+}
+
+
+
+/*******FUNCIONES AUXILIARES PARA TRANSITA*****/
+
+
+
+void AFNDInsertaEstado_Actual(AFND * p_afnd, int indice){
+    if (!p_afnd) ERR("AFND is null");
+
+    for(int k=0;  k<p_afnd->num_estados;  k++){
+        if(p_afnd->estado_actuales[k] == NULL){
+            p_afnd->estado_actuales[k] == p_afnd->estados[indice];
+            p_afnd->num_estados_actuales_paralelos++;
+            return;
+        }
+    }
+}
+
+
+
+
+/*Comprobamos que haya algun estado actual*/
+int AFND_VectorIndicesVacio(AFND * p_afnd ){
+    if(!p_afnd)ERR("error de puntero");
+    if(p_afnd->num_estados_actuales_paralelos <= 0){    /*Esta varaible la modificamos desde AFND_transita*/
+        return 1;
+    }else{
+        return 0;
+    }
 
 }
+
+
+int AFNDIndiceDeEstado(AFND * p_afnd,char * nombre){
+    if(!p_afnd || !nombre) ERR("mal indice");
+    for(int i =0;i <p_afnd->num_estados ;i++){
+        if(strcmp(nombre, estadoNombre(p_afnd->estados[i])  ) == 0 ){
+            return i;
+        }
+    }
+    return -1;
+}
+int AFNDIndiceDeSimbolo(AFND * p_afnd,char * nombre){
+     if(!p_afnd || !nombre) ERR("mal indice");
+     return alfabetoIndiceDeSimbolo(p_afnd->alfabeto,  nombre);
+}
+
+
+
+void AFNDTransita(AFND * p_afnd){
+    char * entrada;
+    int num_transiciones;
+    int indice_fila,indice_col;
+    if(!p_afnd)ERR("error al transitar");
+
+    entrada = palabraQuitaInicio(p_afnd->cadena_actual);
+    if(!entrada)ERR("error al transitar");
+
+    num_transiciones = p_afnd->num_estados_actuales_paralelos;
+    for(int i = 0 ;i< num_transiciones;i++){
+
+
+        
+        
+        indice_fila = AFNDIndiceDeEstado(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));
+        indice_col  = AFNDIndiceDeSimbolo(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));
+        p_afnd->estado_actuales[i] == NULL; /*Lo saco ya que al transitar saldre de ese estado(si no asi se inserta a si mismo en el bucle de abajo)*/
+        p_afnd->num_estados_actuales_paralelos--;
+
+
+        for(int j=0;j < p_afnd->num_estados_actual;j++){
+            if( 1 ==  (p_afnd->ftransicion[indice_fila][indice_col])[j]   ){/*Transitamos*/ /*j es el indice del estadoa  transitar*/
+                 AFNDInsertaEstado_Actual( p_afnd, j);
+            }  
+        }
+    }
+
+    /*Recolocamos  p_afnd->estado_actuales para que no queden nulls arriba*/
+    Estado ** estado_actuales_copy;
+    p_afnd->estado_actuales = (Estado**)malloc(sizeof(Estado*)* p_afnd->num_estados);
+    if (!p_afnd->estado_actuales) ERR("malloc");
+
+    for(int h = 0,g=0;  h < p_afnd->num_estados ;h++){
+        if(p_afnd->estado_actuales[h] != NULL){
+            estado_actuales_copy[g] =  p_afnd->estado_actuales[h];
+            g++;
+        }
+    }
+    free(p_afnd->estado_actuales);
+    p_afnd->estado_actuales = estado_actuales_copy;
+    return;
+
+}
+
+
