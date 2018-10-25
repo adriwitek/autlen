@@ -45,8 +45,10 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
 
     /* MATRIZ DE TRANSICCION */
     a->ftransicion = (VectorIndices **)malloc(sizeof(VectorIndices*)*num_simbolos);
+    if (!a->ftransicion) ERR("malloc");
     for (i=0; i<num_estados; i++){
 		a->ftransicion[i] = (VectorIndices*) malloc (num_estados*sizeof(VectorIndices)); 
+        if (!a->ftransicion[i]) ERR("malloc");
 	}
 	for (i=0; i < num_estados ; i++){
 		for (j=0; j < num_simbolos; j++){
@@ -67,6 +69,18 @@ void AFNDElimina(AFND * p_afnd)
         estadoElimina(p_afnd->estados[i]);
     }
     palabraElimina(p_afnd->cadena_actual);
+
+    for (int i=0; i < p_afnd->num_estados ; i++){
+		for (int j=0; j < p_afnd->num_simbolos; j++){
+			VectorIndicesElimina(p_afnd->ftransicion[i][j]);
+		}
+	}
+
+    for (int i=0; i<p_afnd->num_estados; i++){
+		free(p_afnd->ftransicion[i]);
+	}
+    free(p_afnd->ftransicion);
+
     free(p_afnd->estados);
     free(p_afnd->estado_actuales);
     free(p_afnd);
@@ -83,17 +97,33 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
     alfabetoImprime(fd, p_afnd->alfabeto);
     fprintf(fd,"\n\tnum_estados = %d\n\n",p_afnd->num_estados);
     fprintf(fd,"\tQ={");
-    // for (int i=0; i<p_afnd->num_estados; i++)
-    // {
-    //     estadoImprime(fd, p_afnd->estados[i]);
-    // }
-    // fprintf(fd,"}\n\n\tFuncion de Transicion ={\n\n");
-    // fprintf(fd,"\t\tnot implemented yet\n\n\n");
+    for (int i=0; i<p_afnd->num_estados; i++)
+    {
+        estadoImprime(fd, p_afnd->estados[i]);
+    }
+    fprintf(fd,"}\n\n\tFuncion de Transicion = {\n\n");
+    for (int i=0; i < p_afnd->num_estados ; i++){
+		for (int j=0; j < p_afnd->num_simbolos; j++){
+			fprintf(fd,"\t\t");
+            fprintf(fd,"f(%s",p_afnd->estados[i]->nombre);
+            //estadoImprime(fd, p_afnd->estados[i]);
+            fprintf(fd,",%s)={",p_afnd->alfabeto->simbolos[j]);
+            for (int k=0;k<p_afnd->num_estados; k++)
+            {
+                if (VectorIndicesGetI(p_afnd->ftransicion[i][j],k)==1)
+                {
+                    fprintf(fd," %s",p_afnd->estados[k]->nombre);
+                }
+            }
+            fprintf(fd," }\n");
+		}
+	}
     fprintf(fd,"\t}\n}\n\n");
 }
 
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
     
+<<<<<<< HEAD
 AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
 AFNDImprimeCadenaActual(fd,p_afnd);
 while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio( p_afnd ) ){ /*Minetras queden caracterres y haya estados actuales:*/
@@ -103,6 +133,35 @@ while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio
     }
 
     
+=======
+    int i = 0;
+    int size;
+    char *letraux;
+    
+    if(  fd == NULL || p_afnd == NULL ){
+        ERR("ANFDProcesarEntrada");
+    }
+    
+    size = palabraTamano(p_afnd->cadena_actual);
+    
+    fprintf(fd, "\n\n");
+    fprintf(fd, ">>>>PROCESANDO CADENA: \n \n");
+    fprintf(fd, "\t");
+    palabraImprime(fd,p_afnd->cadena_actual);
+    fprintf(fd, "\n \n \n");
+    
+    for(i=0; i<=size; i++){
+        
+        fprintf(fd,"----Poscion Numero: %d  \n", i);
+        fprintf(fd, "\t");
+        palabraImprime(fd,p_afnd->cadena_actual);
+        fprintf(fd, "\n ");
+        
+        letraux = palabraQuitaInicio(p_afnd->cadena_actual);
+        //
+        free(letraux);
+    }   
+>>>>>>> 353eb0c3c1b0aeb8c1cb719ed8493d062516d907
 }
 
 
@@ -114,7 +173,7 @@ AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i,  char * nomb
     pos_qf= AFNDIndiceDeEstado( p_afnd,nombre_estado_f);
     pos_simbolo = AFNDIndiceDeSimbolo(p_afnd,nombre_simbolo_entrada);
     if(pos_qi == -1 || pos_qf == -1 || pos_simbolo == -1) ERR("ERRO AL INSETAR LA TRANSICION");
-    (p_afnd->ftransicion[pos_qi][pos_simbolo])[pos_qf]=1;
+    VectorIndicesSetI(p_afnd->ftransicion[pos_qi][pos_simbolo],pos_qf);
     return p_afnd;
 }
 AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo)
@@ -271,3 +330,26 @@ void AFNDTransita(AFND * p_afnd){
 }
 
 
+<<<<<<< HEAD
+=======
+}
+
+void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd)
+{
+    if (!fd) ERR("problem with file descriptor");
+    if (!p_afnd) ERR("AFND is NULL");
+
+    for (int i=0; i<p_afnd->num_estados_actual;i++)
+    {
+        estadoImprime(fd, p_afnd->estado_actuales[i]);
+    }
+}
+
+void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd)
+{
+    if (!fd) ERR("problem with file descriptor");
+    if (!p_afnd) ERR("AFND is NULL");
+
+    palabraImprime(fd, p_afnd->cadena_actual);
+}
+>>>>>>> 353eb0c3c1b0aeb8c1cb719ed8493d062516d907

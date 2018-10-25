@@ -25,16 +25,10 @@ typedef struct _AFND
 AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos);
 void AFNDElimina(AFND * p_afnd);
 void AFNDImprime(FILE * fd, AFND* p_afnd);
-AFND * AFNDInsertaTransicion(AFND * p_afnd,
-                            char * nombre_estado_i,
-                            char * nombre_simbolo_entrada,
-                            char * nombre_estado_f );
-
 
 /*FUNCIONES AUXILIARES*/
 int AFNDIndiceDeEstado(AFND * p_afnd,char * nombre);
 int AFNDIndiceDeSimbolo(AFND * p_afnd,char * nombre_simbolo_entrada);
-
 
 AFND * AFNDInsertaSimbolo(AFND * p_afnd, char * simbolo);
 AFND * AFNDInsertaEstado(AFND * p_afnd, char * nombre, int tipo);
