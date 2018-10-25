@@ -34,7 +34,8 @@ void estadoElimina( Estado * p_s)
 void estadoImprime( FILE * fd, Estado * p_s)
 {
     if (!fd) ERR("problem with file descriptor");
-    if (!p_s) ERR("estado is NULL");
+    //if (!p_s) ERR("estado is NULL");
+    if (!p_s) return;
 
     switch(p_s->tipo)
     {
