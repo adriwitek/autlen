@@ -42,6 +42,9 @@ int main(int argc, char ** argv)
     AFNDImprime(stdout,p_afnd);
     fprintf(stdout,"\n*********************************************\n");
 
+
+
+
 /* DEFINICIÓN DE LA CADENA DE ENTRADA [ 0 1 0 1 1 ] */
     p_afnd= AFNDInsertaLetra(p_afnd,"0");
     p_afnd= AFNDInsertaLetra(p_afnd,"1");
@@ -74,7 +77,7 @@ int main(int argc, char ** argv)
 /* SE ESTABLECE COMO ESTADO ACTUAL DEL AUTÓMATA EL INICIAL */
 
     AFNDInicializaEstado (p_afnd);
-
+    
 /* SE MUESTRA LA CADENA ACTUAL */
 
     fprintf(stdout,"\n**************** PROCESA CADENA *************\n");
