@@ -65,7 +65,7 @@ int main(int argc, char ** argv)
 /* SE PROCESA LA CADENA DE ENTRADA ACTUAL MOSTRANDO UNA TRAZA DEL FUNCIONAMIENTO DEL AUTOMATA: EN CADA PASO DE ANÁLISIS SE MUESTRA LA CADENA ACTUAL Y EL CONJUNTO DE ESTADOS EN LOS QUE SE ENCUENTRA EL AUTÓMATA */
 
     AFNDProcesaEntrada(stdout,p_afnd);
-
+   
 
 /* DEFINICIÓN DE LA CADENA DE ENTRADA [ 0 1 1 0 0 ] */
     p_afnd= AFNDInsertaLetra(p_afnd,"0");
@@ -73,6 +73,9 @@ int main(int argc, char ** argv)
     p_afnd= AFNDInsertaLetra(p_afnd,"1");
     p_afnd= AFNDInsertaLetra(p_afnd,"0");
     p_afnd= AFNDInsertaLetra(p_afnd,"0");
+
+
+
 
 /* SE ESTABLECE COMO ESTADO ACTUAL DEL AUTÓMATA EL INICIAL */
 

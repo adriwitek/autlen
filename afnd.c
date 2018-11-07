@@ -136,6 +136,8 @@ while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio
 
     AFNDInicializaCadenaActual(p_afnd);
     AFNDInicializaEstado(p_afnd);
+    
+  
 }
 
 
@@ -146,7 +148,7 @@ AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i,  char * nomb
     pos_qi= AFNDIndiceDeEstado( p_afnd,nombre_estado_i);
     pos_qf= AFNDIndiceDeEstado( p_afnd,nombre_estado_f);
     pos_simbolo = AFNDIndiceDeSimbolo(p_afnd,nombre_simbolo_entrada);
-    if(pos_qi == -1 || pos_qf == -1 || pos_simbolo == -1) ERR("ERRO AL INSETAR LA TRANSICION");
+    if(pos_qi == -1 || pos_qf == -1 || pos_simbolo == -1) ERR("ERROR AL INSETAR LA TRANSICION");
     VectorIndicesSetI(p_afnd->ftransicion[pos_qi][pos_simbolo],pos_qf);
     return p_afnd;
 }
@@ -202,16 +204,19 @@ AFND * AFNDInicializaCadenaActual (AFND * p_afnd ){
 }
 /*Inicializamos TODOS los estados de tipo INICIAL*/
 AFND * AFNDInicializaEstado (AFND * p_afnd){
-    if(!p_afnd)ERR("inicializando estado");
+    if(!p_afnd){ERR("inicializando estado");}
     
-    Estado ** estado_actuales_copy;
-    estado_actuales_copy = (Estado**)malloc(sizeof(Estado*)* p_afnd->num_estados);
-    if (!p_afnd->estado_actuales) ERR("malloc");
+
     free(p_afnd->estado_actuales);
+    Estado ** estado_actuales_copy;
+    estado_actuales_copy = (Estado**)calloc(p_afnd->num_estados, sizeof(Estado*) );
+    if (estado_actuales_copy == NULL) {
+        ERR("malloc");
+    }
+
+    
     p_afnd->estado_actuales = estado_actuales_copy;
 
-
-  
 
     p_afnd->num_estados_actuales_paralelos =0;
      for(int i = 0; i < p_afnd->num_estados; i++){
@@ -220,6 +225,7 @@ AFND * AFNDInicializaEstado (AFND * p_afnd){
             p_afnd->num_estados_actuales_paralelos ++;
         }
     }
+
     return p_afnd;
 }
 
@@ -310,10 +316,13 @@ void AFNDTransita(AFND * p_afnd){
     
 
     num_transiciones = p_afnd->num_estados_actuales_paralelos;
+    /**/
+    /*printf("---n. estados_actuales_paralelos: %d\n\n",num_transiciones);*/
+    /**/
 
     Estado ** estado_actuales_copy;
-    estado_actuales_copy = (Estado**)malloc(sizeof(Estado*)* p_afnd->num_estados);
-    if (!p_afnd->estado_actuales) ERR("malloc");
+    estado_actuales_copy = (Estado**)calloc( p_afnd->num_estados,sizeof(Estado*));
+    if (p_afnd->estado_actuales == NULL) {ERR("malloc");}
 
     for(int i = 0 ;i< num_transiciones;i++){/*Procesamos todos los estados actuales*/
         procesa_transicion_estado( p_afnd, i,entrada, estado_actuales_copy,&n);/*para cada estado*/

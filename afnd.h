@@ -11,11 +11,11 @@ typedef struct _AFND
     char * nombre;
     Alfabeto * alfabeto;
     int num_estados;
-    int num_estados_actual; /*numero de estados INSERTADOS*/
-    int num_estados_actuales_paralelos;
+    int num_estados_actual; /*numero de estados INSERTADOS en el afnd*/
+    int num_estados_actuales_paralelos; /* num estados en los que se esta actualmente*/
     int num_simbolos;
     Estado ** estados;
-    Estado ** estado_actuales;
+    Estado ** estado_actuales; /*  estados en los que se esta actualmente*/
     Palabra * cadena_actual;
     //int contador;
     VectorIndices ** ftransicion;

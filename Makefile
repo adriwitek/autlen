@@ -6,6 +6,8 @@ automatas: automatas.c
 
 palabra.o: palabra.c 
 	gcc -Wall -c palabra.c -o palabra.o	
+run:
+	./automatas	
 .PHONY: clean all
 clean:
 	rm -f *.o	
