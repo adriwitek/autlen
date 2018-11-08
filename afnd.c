@@ -54,7 +54,7 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
         }
     }
 
-
+    a->lambdaTransiciones = relacionNueva("lambda_relacion",num_estados);
 
     return a;
 }
@@ -78,6 +78,9 @@ void AFNDElimina(AFND * p_afnd)
     for (int i=0; i<p_afnd->num_estados; i++){
 		free(p_afnd->ftransicion[i]);
 	}
+
+    relacionElimina(p_afnd->lambdaTransiciones);
+
     free(p_afnd->ftransicion);
 
     free(p_afnd->estados);
@@ -366,4 +369,35 @@ void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd)
     if (!p_afnd) ERR("AFND is NULL");
    
     palabraImprime(fd, p_afnd->cadena_actual);
+}
+
+AFND * AFNDInsertaLTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombre_estado_f )
+{
+    if (!p_afnd) ERR("AFND is null");
+    if (!nombre_estado_i || !nombre_estado_f) ERR("bad arguments");
+
+    int i= AFNDIndiceDeEstado( p_afnd,nombre_estado_i);
+    int j= AFNDIndiceDeEstado( p_afnd,nombre_estado_f);
+    if(i == -1 || j == -1) ERR("mal indice");
+
+    p_afnd->lambdaTransiciones->relacion[i][j] = 1;
+
+    return p_afnd;
+}
+
+int AFNDLTransicionIJ(AFND * p_afnd, int i , int j)
+{
+    if (!p_afnd) ERR("AFND is null");
+    if (i<0 || j<0 || i>=p_afnd->num_estados || j>=p_afnd->num_estados) ERR("indices malos");
+
+    return p_afnd->lambdaTransiciones->relacion[i][j];
+}
+
+AFND * AFNDCierraLTransicion (AFND * p_afnd)
+{
+    if (!p_afnd) ERR("AFND is null");
+
+    p_afnd->lambdaTransiciones = relacionCierreTransitivo(p_afnd->lambdaTransiciones);
+
+    return p_afnd;
 }

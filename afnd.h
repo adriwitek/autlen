@@ -5,6 +5,7 @@
 #include "estado.h"
 #include "palabra.h"
 #include "vector.h"
+#include "relacion.h"
 
 typedef struct _AFND 
 {
@@ -17,9 +18,8 @@ typedef struct _AFND
     Estado ** estados;
     Estado ** estado_actuales; /*  estados en los que se esta actualmente*/
     Palabra * cadena_actual;
-    //int contador;
     VectorIndices ** ftransicion;
-
+    Relacion * lambdaTransiciones;
 }AFND;
 
 AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos);
@@ -45,6 +45,9 @@ int AFND_VectorIndicesVacio(AFND * p_afnd );
 void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd);
 void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd);
 
+/*LAMBDA TRANSICIONES*/
 AFND * AFNDInsertaLTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombre_estado_f );
-void AFNDCierraLTransicion(AFND * p_afnd);
+int AFNDLTransicionIJ(AFND * p_afnd, int i , int j);
+AFND * AFNDCierraLTransicion (AFND * p_afnd);
+
 #endif //AFND_H

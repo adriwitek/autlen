@@ -160,6 +160,7 @@ void relacionElimina(Relacion * p_r)
     free(p_r->nombre);
     matrizElimina(p_r->relacion ,p_r->num_elementos);
     matrizElimina(p_r->cierre_relacion ,p_r->num_elementos);
+    free(p_r);
 }
 
 Relacion * relacionInserta(Relacion * p_r, int i, int j)
@@ -201,7 +202,29 @@ void relacionImprime(FILE * fd, Relacion * p_r)
     fprintf(fd, "\n");
 
     fprintf(fd, "\t\tCIERRE\n");
-    matrizImprime(fd, p_r->cierre_relacion, p_r->num_elementos);
+    matrizImprime(fd, p_r->cierre_relacion, p_r->num_elementos);  
+
+    int n = p_r->num_elementos;
+    int ** matrDespues = matrizCopia(p_r->relacion,n);
+    int ** matrAntes;
+    for (int i=0; i<n; i++)
+    {
+        matrAntes = matrizCopia(matrDespues,n);
+        matrDespues = matrizMultiplica(matrAntes, p_r->relacion, n);
+
+        fprintf(fd, "\t\tPOTENCIA %d\n",i+2);
+        matrizImprime(fd, matrDespues, p_r->num_elementos);
+
+        //optimalizacion
+        if (matrizCompara(matrAntes,matrDespues,n) || matrizVacia(matrDespues,n))
+        {
+            break;
+        }
+    }
+
+    fprintf(fd, "\t\tRELACION INICIAL\n");
+    matrizImprime(fd, p_r->relacion, p_r->num_elementos); 
+
     fprintf(fd, "}\n");
 }
 
@@ -219,10 +242,6 @@ Relacion * relacionCierreTransitivo(Relacion * p_r)
 
         matrSuma = matrizSuma(matrSuma, matrDespues, n);
 
-        matrizImprime(stdout,matrAntes,n);
-        matrizImprime(stdout,matrDespues,n);
-        fprintf(stdout, "%d) //// %d ////\n",i,matrizCompara(matrAntes,matrDespues,n));
-        
         //optimalizacion
         if (matrizCompara(matrAntes,matrDespues,n) || matrizVacia(matrDespues,n))
         {
