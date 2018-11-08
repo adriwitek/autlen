@@ -19,5 +19,9 @@ int ** matrizCopia(int** matriz, int n);
 int ** matrizMultiplica(int** m1, int** m2, int n);
 int ** matrizSuma(int** m1, int** m2, int n);
 void matrizImprime(FILE * fd, int** m, int n);
+int matrizCompara(int** m1, int** m2, int n);
+int matrizVacia(int** m1, int n);
+Relacion * relacionCierreTransitivo(Relacion * p_r);
+void matrizArreglarUnos(int** matriz, int n);
 
 #endif //RELACION_H

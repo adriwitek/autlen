@@ -74,6 +74,21 @@ int ** matrizCopia(int** matriz, int n)
     return matriz2;
 }
 
+void matrizArreglarUnos(int** matriz, int n)
+{
+    if (!matriz) ERR("matriz null");
+    for (int i=0; i < n ; i++)
+    {
+        for (int j=0; j < n; j++)
+        {
+            if (matriz[i][j]>1)
+            {
+                matriz[i][j]=1;
+            }
+        }
+    }
+}
+
 int ** matrizMultiplica(int** m1, int** m2, int n)
 {
     if (!m1 || !m2) ERR("malas matrices");
@@ -92,6 +107,7 @@ int ** matrizMultiplica(int** m1, int** m2, int n)
             sum = 0;
         }
     }
+    matrizArreglarUnos(matrizMultiplicada, n);
     return matrizMultiplicada;
 }
 
@@ -106,7 +122,36 @@ int ** matrizSuma(int** m1, int** m2, int n)
             m1[i][j] += m2[i][j];
         }
     }
+    matrizArreglarUnos(m1, n);
     return m1;
+}
+
+
+int matrizCompara(int** m1, int** m2, int n)
+{
+    if (!m1 || !m2) ERR("malas matrices");
+
+    for (int i=0; i<n; i++)
+    {
+        for (int j=0; j<n; j++)
+        {
+            if (m1[i][j]!=m2[i][j]) return 0;
+        }
+    }
+    return 1;
+}
+
+int matrizVacia(int** m, int n)
+{
+     if (!m) ERR("matriz mala");
+     for (int i=0; i<n; i++)
+    {
+        for (int j=0; j<n; j++)
+        {
+            if (m[i][j]!=0) return 0;
+        }
+    }
+    return 1;
 }
 
 void relacionElimina(Relacion * p_r)
@@ -156,6 +201,36 @@ void relacionImprime(FILE * fd, Relacion * p_r)
     fprintf(fd, "\n");
 
     fprintf(fd, "\t\tCIERRE\n");
-    matrizImprime(fd, p_r->relacion, p_r->num_elementos);
-    fprintf(fd, "}");
+    matrizImprime(fd, p_r->cierre_relacion, p_r->num_elementos);
+    fprintf(fd, "}\n");
+}
+
+Relacion * relacionCierreTransitivo(Relacion * p_r)
+{
+    int n = p_r->num_elementos;
+    int ** matrInicial = matrizCopia(p_r->relacion,n);
+    int ** matrSuma = matrizCopia(p_r->relacion,n);
+    int ** matrDespues = matrizCopia(p_r->relacion,n);
+    int ** matrAntes;
+    for (int i=0; i<n; i++)
+    {
+        matrAntes = matrizCopia(matrDespues,n);
+        matrDespues = matrizMultiplica(matrAntes, matrInicial, n);
+
+        matrSuma = matrizSuma(matrSuma, matrDespues, n);
+
+        matrizImprime(stdout,matrAntes,n);
+        matrizImprime(stdout,matrDespues,n);
+        fprintf(stdout, "%d) //// %d ////\n",i,matrizCompara(matrAntes,matrDespues,n));
+        
+        //optimalizacion
+        if (matrizCompara(matrAntes,matrDespues,n) || matrizVacia(matrDespues,n))
+        {
+            break;
+        }
+    }
+
+    p_r->cierre_relacion = matrSuma;
+    
+    return p_r;
 }

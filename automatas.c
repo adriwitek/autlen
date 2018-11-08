@@ -25,6 +25,8 @@ int main(int argc, char ** argv)
     relacionInserta(r1,5,7);
     relacionInserta(r1,6,5);
 
+    r1 = relacionCierreTransitivo(r1);
+
     fprintf(stdout,"R1\n");
     relacionImprime(stdout,r1);
     relacionElimina(r1);
