@@ -4,8 +4,8 @@
 typedef struct _Relacion
 {
     char * nombre;
-    int ** relacion;
-    int ** cierre_relacion;
+    int ** relacion;  /*relacion de partida*/
+    int ** cierre_relacion; /*el cierre de la transicion*/
     int num_elementos;
 }Relacion;
 
@@ -23,5 +23,10 @@ int matrizCompara(int** m1, int** m2, int n);
 int matrizVacia(int** m1, int n);
 Relacion * relacionCierreTransitivo(Relacion * p_r);
 void matrizArreglarUnos(int** matriz, int n);
+
+
+void relacionImprime_teorico(FILE * fd, Relacion * p_r);
+void matrizImprime_teorico(FILE * fd, int** m, int n);
+
 
 #endif //RELACION_H

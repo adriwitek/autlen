@@ -19,7 +19,7 @@ typedef struct _AFND
     Estado ** estado_actuales; /*  estados en los que se esta actualmente*/
     Palabra * cadena_actual;
     VectorIndices ** ftransicion;
-    Relacion * lambdaTransiciones;
+    Relacion * lambdaTransiciones; /*Estructura para gestionar las tansiciones lambda*/
 }AFND;
 
 AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos);
@@ -48,6 +48,12 @@ void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd);
 /*LAMBDA TRANSICIONES*/
 AFND * AFNDInsertaLTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombre_estado_f );
 int AFNDLTransicionIJ(AFND * p_afnd, int i , int j);
-AFND * AFNDCierraLTransicion (AFND * p_afnd);
+int AFNDLTransicionIJ_cierre(AFND * p_afnd, int i , int j);
+AFND * AFNDCierraLTransicion(AFND * p_afnd);
+
+int AFND_isInEstadosActuales(AFND * p_afnd,int estado);
+void AFNDTransita_Lmabda(AFND * p_afnd);
+
+
 
 #endif //AFND_H

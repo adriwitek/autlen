@@ -6,6 +6,11 @@ automatas: automatas.c
 
 palabra.o: palabra.c 
 	gcc -Wall -c palabra.c -o palabra.o	
+
+
+test_relacion:
+	gcc -Wall -g -o test_relacion test_relacion.c alfabeto.c estado.c palabra.c vector.c afnd.c relacion.c
+
 run:
 	./automatas	
 .PHONY: clean all

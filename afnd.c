@@ -131,6 +131,7 @@ void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
 while (  (palabraTamano(p_afnd->cadena_actual) > 0) &&  !AFND_VectorIndicesVacio( p_afnd ) ){ /*Minetras queden caracterres y haya estados actuales:*/
        // printf("vamos a transitar \n");
         AFNDTransita(p_afnd);
+        AFNDTransita_Lmabda( p_afnd);
       // printf("hemos transitado \n");
 
        AFNDImprimeConjuntoEstadosActual(fd,p_afnd);
@@ -219,14 +220,32 @@ AFND * AFNDInicializaEstado (AFND * p_afnd){
 
     
     p_afnd->estado_actuales = estado_actuales_copy;
-
-
+    
+    
     p_afnd->num_estados_actuales_paralelos =0;
-     for(int i = 0; i < p_afnd->num_estados; i++){
+    for(int i = 0; i < p_afnd->num_estados; i++){
         if(estadoTipo(p_afnd->estados[i]) == INICIAL){
             p_afnd->estado_actuales[p_afnd->num_estados_actuales_paralelos] = p_afnd->estados[i];
             p_afnd->num_estados_actuales_paralelos ++;
+
+            
+            for(int j = 0;j  < p_afnd->num_estados ;j++){   
+                if(AFNDLTransicionIJ_cierre(p_afnd,i,j) != 0 &&  (  AFND_isInEstadosActuales( p_afnd,j) == 0 )  ){
+                    p_afnd->estado_actuales[p_afnd->num_estados_actuales_paralelos] = p_afnd->estados[j];
+                    p_afnd->num_estados_actuales_paralelos ++;
+                }
+
+            }
+
+
+
         }
+
+       
+        
+
+
+
     }
 
     return p_afnd;
@@ -282,21 +301,22 @@ int AFNDIndiceDeSimbolo(AFND * p_afnd,char * nombre){
      return alfabetoIndiceDeSimbolo(p_afnd->alfabeto,  nombre);
 }
 
-
+/*Funcion auxiliar para AFNDTransita*/
 void procesa_transicion_estado(AFND * p_afnd,int i,char* entrada,Estado** estado_actuales_copy,int *n){/*i = indice*/
     int indice_fila,indice_col;
 
     
-        indice_fila = AFNDIndiceDeEstado(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));
+        indice_fila = AFNDIndiceDeEstado(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));/* i :estado en el que esta la maquina*/
         
-        indice_col  = AFNDIndiceDeSimbolo(p_afnd,entrada);
+        indice_col  = AFNDIndiceDeSimbolo(p_afnd,entrada); /*simbolo de entrada*/
         if (indice_fila==-1 || indice_col == -1){
             fprintf(stdout, "indice = -1 !!\n");
         }
 
        
-        for(int j=0;j < p_afnd->num_estados_actual;j++){
+        for(int j=0;j < p_afnd->num_estados_actual;j++){/*Recorremos TODOS los estados INSERTADOS en el AFND : j es el indice del estado destino*/
             //fprintf(stdout,"fila: %d, col: %d, j: %d\n",indice_fila,indice_col,j);
+            /*Transicion normal:*/
             if( 1 ==  (p_afnd->ftransicion[indice_fila][indice_col])[j]   ){/*Transitamos*/ /*j es el indice del estadoa  transitar*/
                  //fprintf(stdout,"transito aqui\n");
                  estado_actuales_copy[*n] = p_afnd->estados[j];
@@ -304,7 +324,10 @@ void procesa_transicion_estado(AFND * p_afnd,int i,char* entrada,Estado** estado
                  if(!p_afnd->estados[j]) printf("el estado el null \n");
                  
             }  
+
         }
+
+
 }
 
 void AFNDTransita(AFND * p_afnd){
@@ -331,17 +354,73 @@ void AFNDTransita(AFND * p_afnd){
         procesa_transicion_estado( p_afnd, i,entrada, estado_actuales_copy,&n);/*para cada estado*/
     }
     
-    
 
-    
-  
-    free(p_afnd->estado_actuales);
+     free(p_afnd->estado_actuales);
     p_afnd->estado_actuales= estado_actuales_copy;
     p_afnd->num_estados_actuales_paralelos = n;
+    
     return;
 
 }
 
+
+void AFNDTransita_Lmabda(AFND * p_afnd){
+
+    // printf("eee\n");
+     //printf("aaaaa :  EL ESTADO %d esta en e. actuales\n",i);
+   
+    
+    int * estados_en_maquina;
+    int num = 0;
+    estados_en_maquina = calloc(p_afnd->num_estados,sizeof(int));
+    if(!estados_en_maquina){ERR("reservando memoria");}       
+
+    for(int i = 0;i  < p_afnd->num_estados ;i++){ 
+        for(int k =0;k< p_afnd->num_estados_actuales_paralelos;k++){
+             if(p_afnd->estado_actuales[k] == p_afnd->estados[i]){
+                estados_en_maquina[num] = i;
+                //aaa
+                //printf("estados_en_maquina:%d\n",i);
+                num ++;
+
+            }
+
+        }  
+       
+
+    }    
+
+
+
+
+    for(int u =0;u < num;u++){
+        for(int j = 0;j  < p_afnd->num_estados ;j++){   
+            if(AFNDLTransicionIJ_cierre(p_afnd,estados_en_maquina[u],j) != 0  ){
+               // printf("TESTTT\n");
+                //printf("el estado que voy a meter debria ser el: %d\n",estados_en_maquina[u]);
+                    p_afnd->estado_actuales[p_afnd->num_estados_actuales_paralelos] = p_afnd->estados[j];
+                    p_afnd->num_estados_actuales_paralelos ++;
+        }
+
+        }
+
+
+    }
+        
+
+
+
+        
+
+       
+        
+
+
+
+    
+    
+    
+}
 
 
 
@@ -389,9 +468,20 @@ int AFNDLTransicionIJ(AFND * p_afnd, int i , int j)
 {
     if (!p_afnd) ERR("AFND is null");
     if (i<0 || j<0 || i>=p_afnd->num_estados || j>=p_afnd->num_estados) ERR("indices malos");
-
+    
     return p_afnd->lambdaTransiciones->relacion[i][j];
 }
+
+
+
+int AFNDLTransicionIJ_cierre(AFND * p_afnd, int i , int j)
+{
+    if (!p_afnd) ERR("AFND is null");
+    if (i<0 || j<0 || i>=p_afnd->num_estados || j>=p_afnd->num_estados) ERR("indices malos");
+    
+    return p_afnd->lambdaTransiciones->cierre_relacion[i][j];
+}
+
 
 AFND * AFNDCierraLTransicion (AFND * p_afnd)
 {
@@ -401,3 +491,21 @@ AFND * AFNDCierraLTransicion (AFND * p_afnd)
 
     return p_afnd;
 }
+
+
+
+  int AFND_isInEstadosActuales(AFND * p_afnd,int estado){
+      int flag = 0;
+
+      for(int i = 0;i < p_afnd->num_estados_actual;i++){
+          for(int j;j<p_afnd->num_estados_actuales_paralelos  ;j++){
+              if(p_afnd->estados[i] == p_afnd->estado_actuales[j] ){
+                  flag = 1;
+              }
+          }
+
+      }
+
+
+    return flag; 
+  }

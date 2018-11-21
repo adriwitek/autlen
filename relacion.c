@@ -253,3 +253,42 @@ Relacion * relacionCierreTransitivo(Relacion * p_r)
     
     return p_r;
 }
+
+
+
+void matrizImprime_teorico(FILE * fd, int** m, int n)
+{
+    if (!m) ERR("matriz null");
+
+    
+    for (int i=0; i<n; i++)
+    {
+        fprintf(fd, "\t[%d]",i);
+        for (int j=0; j<n; j++)
+        {
+            if(i ==j){
+                 fprintf(fd, "\t1");
+            }else{
+                fprintf(fd, "\t%d",m[i][j]);
+            }
+            
+        }
+        fprintf(fd, "\n");
+    }
+    fprintf(fd, "\n");
+}
+
+
+void relacionImprime_teorico(FILE * fd, Relacion * p_r)
+{
+    if (!fd) ERR("fd null");
+    if (!p_r) ERR("p_r null");
+
+   
+
+    fprintf(fd, "\t\tRL++* = \n");
+
+    matrizImprime_teorico(fd, p_r->cierre_relacion, p_r->num_elementos); 
+
+    fprintf(fd, "}\n");
+}
