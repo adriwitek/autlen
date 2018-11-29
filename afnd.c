@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "afnd.h"
+#include <time.h>
 
 #define ERR(source) (perror(source),\
 		     fprintf(stderr,"%s:%d\n",__FILE__,__LINE__),\
@@ -509,3 +510,72 @@ AFND * AFNDCierraLTransicion (AFND * p_afnd)
 
     return flag; 
   }
+
+
+
+  /*Avance Practica 3*/
+
+AFND * AFND1ODeSimbolo( char * simbolo){
+        AFND * p_afnd_l;
+        
+        p_afnd_l = AFNDNuevo(simbolo, 2, 1);
+        if(NULL == p_afnd_l){
+            return NULL;
+        }
+        AFNDInsertaSimbolo(p_afnd_l, simbolo);
+        AFNDInsertaEstado(p_afnd_l, "q0", INICIAL );
+        AFNDInsertaEstado(p_afnd_l, "qf", FINAL );
+        AFNDInsertaTransicion(p_afnd_l, "q0", simbolo, "qf");
+        return p_afnd_l;
+  }
+
+
+ AFND * AFND1ODeLambda(){
+    
+    AFND * p_afnd_l;
+    int random;
+    char str[50];
+    srand(time(NULL));   // Initialization, should only be called once.
+    random = rand();  
+    sprintf(str, "%d", random);
+    p_afnd_l = AFNDNuevo(str, 1 , 0);
+    if(NULL == p_afnd_l){
+            return NULL;
+        }
+    AFNDInsertaEstado(p_afnd_l, "q0", INICIAL_Y_FINAL );
+    return p_afnd_l;
+ }
+
+
+
+AFND * AFND1ODeVacio( ){
+    AFND * p_afnd_l;
+    int random;
+    char str[50];
+    srand(time(NULL));   // Initialization, should only be called once.
+    random = rand() + 1;  
+    sprintf(str, "%d", random);
+    p_afnd_l = AFNDNuevo(str, 1 , 0);
+    if(NULL == p_afnd_l){
+            return NULL;
+        }
+    AFNDInsertaEstado(p_afnd_l, "q0", INICIAL );
+    AFNDInsertaEstado(p_afnd_l, "qf", FINAL );
+    return p_afnd_l;
+}
+
+
+AFND * AFND1OInsertaSimbolosAFND(AFND * p_afnd_destino, AFND * p_afnd_origen){
+    
+    int i;
+
+    if(NULL == p_afnd_destino || NULL == p_afnd_origen){
+        return NULL;
+    }
+
+    for(i=0;i<p_afnd_origen-> ;i++){}
+
+
+
+}
+
