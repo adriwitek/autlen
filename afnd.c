@@ -54,7 +54,7 @@ AFND* AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
             a->ftransicion[i][j]= VectorIndicesNuevo(num_estados);
         }
     }
-
+    /*Matriz tansiciones lambda*/
     a->lambdaTransiciones = relacionNueva("lambda_relacion",num_estados);
 
     return a;
@@ -95,24 +95,25 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
     if (!p_afnd) ERR("AFND is NULL");
 
     fprintf(fd,"%s={\n",p_afnd->nombre);
-    fprintf(fd,"\tnum_simbolos = %d\n\n",p_afnd->num_simbolos);
+    fprintf(fd,"\tnum_simbolos = %d\n\n",alfabeto_get_numSimbolosActual( p_afnd->alfabeto) );
     fprintf(fd,"\tA=");
     alfabetoImprime(fd, p_afnd->alfabeto);
-    fprintf(fd,"\n\tnum_estados = %d\n\n",p_afnd->num_estados);
+    fprintf(fd,"\n\tnum_estados = %d\n\n",p_afnd->num_estados_actual);
     fprintf(fd,"\tQ={");
-    for (int i=0; i<p_afnd->num_estados; i++)
+    for (int i=0; i<p_afnd->num_estados_actual; i++)
     {
         estadoImprime(fd, p_afnd->estados[i]);
     }
     fprintf(fd,"}\n\n\tFuncion de Transicion = {\n\n");
-    for (int i=0; i < p_afnd->num_estados ; i++){
-		for (int j=0; j < p_afnd->num_simbolos; j++){
-			fprintf(fd,"\t\t");
+    for (int i=0; i < p_afnd->num_estados_actual ; i++){
+		for (int j=0; j < alfabeto_get_numSimbolosActual( p_afnd->alfabeto) ; j++){//p3
+            //printf("El simbolo es: %s\n",p_afnd->estados[i]->nombre);
+            fprintf(fd,"\t\t");
             fprintf(fd,"f(%s",p_afnd->estados[i]->nombre);
             //estadoImprime(fd, p_afnd->estados[i]);
             fprintf(fd,",%s)={",p_afnd->alfabeto->simbolos[j]);
            
-            for (int k=0;k<p_afnd->num_estados; k++)
+            for (int k=0;k<p_afnd->num_estados_actual; k++)
             {
                 if (VectorIndicesGetI(p_afnd->ftransicion[i][j],k)==1)
                 {
@@ -120,6 +121,8 @@ void AFNDImprime(FILE * fd, AFND* p_afnd)
                 }
             }
             fprintf(fd," }\n");
+            
+			
 		}
 	}
     fprintf(fd,"\t}\n}\n\n");
@@ -306,7 +309,7 @@ int AFNDIndiceDeSimbolo(AFND * p_afnd,char * nombre){
 void procesa_transicion_estado(AFND * p_afnd,int i,char* entrada,Estado** estado_actuales_copy,int *n){/*i = indice*/
     int indice_fila,indice_col;
 
-    
+       
         indice_fila = AFNDIndiceDeEstado(p_afnd,estadoNombre(   p_afnd->estado_actuales[i]   ));/* i :estado en el que esta la maquina*/
         
         indice_col  = AFNDIndiceDeSimbolo(p_afnd,entrada); /*simbolo de entrada*/
@@ -513,12 +516,25 @@ AFND * AFNDCierraLTransicion (AFND * p_afnd)
 
 
 
-  /*Avance Practica 3*/
 
+
+
+
+
+
+
+
+/**************Avance Practica 3**********/
+
+
+/*Crea un atomata para un simbolo*/
 AFND * AFND1ODeSimbolo( char * simbolo){
         AFND * p_afnd_l;
-        
-        p_afnd_l = AFNDNuevo(simbolo, 2, 1);
+        if(NULL == simbolo){
+            return NULL;
+        }
+
+        p_afnd_l = AFNDNuevo(simbolo, MAX_SIZE_OF_ESTADOS-10, MAX_SIZE_OF_SIMBOLOS-10);
         if(NULL == p_afnd_l){
             return NULL;
         }
@@ -529,7 +545,7 @@ AFND * AFND1ODeSimbolo( char * simbolo){
         return p_afnd_l;
   }
 
-
+/*Crea un atomata para lambda */  /**NOTA : el nombre se genera aletoriamente*/
  AFND * AFND1ODeLambda(){
     
     AFND * p_afnd_l;
@@ -537,45 +553,215 @@ AFND * AFND1ODeSimbolo( char * simbolo){
     char str[50];
     srand(time(NULL));   // Initialization, should only be called once.
     random = rand();  
-    sprintf(str, "%d", random);
-    p_afnd_l = AFNDNuevo(str, 1 , 0);
+    sprintf(str, "afnd_%d", random);
+    //p_afnd_l = AFNDNuevo(str, 1 , 0);
+  
+    p_afnd_l = AFNDNuevo(str, MAX_SIZE_OF_ESTADOS-10, MAX_SIZE_OF_SIMBOLOS-10);
     if(NULL == p_afnd_l){
-            return NULL;
-        }
+        return NULL;
+    }
     AFNDInsertaEstado(p_afnd_l, "q0", INICIAL_Y_FINAL );
     return p_afnd_l;
  }
 
 
-
+/*Crea un atomata para el vacio */  /**NOTA : el nombre se genera aletoriamente*/
 AFND * AFND1ODeVacio( ){
     AFND * p_afnd_l;
     int random;
     char str[50];
-    srand(time(NULL));   // Initialization, should only be called once.
+    srand(time(NULL));   
     random = rand() + 1;  
-    sprintf(str, "%d", random);
-    p_afnd_l = AFNDNuevo(str, 1 , 0);
+    sprintf(str, "afnd_%d", random);
+    //p_afnd_l = AFNDNuevo(str, 1 , 0);
+    p_afnd_l = AFNDNuevo(str, MAX_SIZE_OF_ESTADOS-10, MAX_SIZE_OF_SIMBOLOS-10);
     if(NULL == p_afnd_l){
             return NULL;
         }
     AFNDInsertaEstado(p_afnd_l, "q0", INICIAL );
     AFNDInsertaEstado(p_afnd_l, "qf", FINAL );
+    /*sin transiciones por ser el vacio*/
     return p_afnd_l;
 }
 
-
+/*Anniade lo simbolos del origen al destino!*/
 AFND * AFND1OInsertaSimbolosAFND(AFND * p_afnd_destino, AFND * p_afnd_origen){
     
-    int i;
-
+    int i,j;
+    int flag_encontrado = 0;
     if(NULL == p_afnd_destino || NULL == p_afnd_origen){
+        ERR("Error :Automata Nulo");
+        return NULL;
+    }
+    
+    for(i=0;i< alfabeto_get_numSimbolosActual(p_afnd_origen->alfabeto ) ;i++){/*num_simbolos no es el numero de insertados,si no el maximo*/
+        flag_encontrado = 0;
+        for(j=0;j<alfabeto_get_numSimbolosActual(p_afnd_destino->alfabeto ) ;j++){ /*bucle para saber si el destino ya tiene ese simbolo*/
+            if( strcmp(p_afnd_origen->alfabeto->simbolos[i]   , p_afnd_destino->alfabeto->simbolos[j]     )== 0  && (p_afnd_origen->alfabeto->simbolos[i] != NULL) ){
+                flag_encontrado = 1;
+            }
+        }
+        /*Si el destino no lo tiene,insertamos*/
+        if(flag_encontrado == 0 ){
+            if(NULL == alfabetoInsertaSimbolo(p_afnd_destino->alfabeto,p_afnd_origen->alfabeto->simbolos[i] )  ){/*ya se maneja el maximo*/
+                ERR("Error fusionar los simbolos");
+                return NULL;
+            } //cdc
+            
+        }
+
+    }
+
+    return p_afnd_destino;
+
+}
+
+/*Se annide un sufijo,no sufijo*//*ahora mismo origen y destino estan invertidos aqui*/
+AFND * AFND1OInsertaEstadosTransicionesAFND(AFND * p_afnd_destino, AFND * p_afnd_origen, char * sufijo_estados){
+    int offset,columna;
+    char  cadena_aux[100];
+    if(NULL == p_afnd_destino || NULL == p_afnd_origen){
+        ERR("Error :Automata Nulo");
         return NULL;
     }
 
-    for(i=0;i<p_afnd_origen-> ;i++){}
+    /*Controlamos el numero maximo de estados del automata origen*/
+    p_afnd_origen->num_estados = p_afnd_origen->num_estados + p_afnd_destino->num_estados;
+    offset = p_afnd_origen->num_estados_actual;
+ 
+    //Bucle para insertar los estados en el origen
+    for(int i=0;i<p_afnd_destino->num_estados_actual ;i++){
+
+     strcpy(cadena_aux, p_afnd_destino->estados[i]->nombre) ;
+     strcat(cadena_aux, "_sufijotemporal");  
+     AFNDInsertaEstado(p_afnd_origen,cadena_aux, NORMAL);
+       //Innecesarias
+       //quitar_tipoIni_FinalEstado(p_afnd_origen->estados[p_afnd_origen->num_estados_actual - 1]);
+        //annide_sufijoEstado(p_afnd_destino->estados[p_afnd_origen->num_estados_actual - 1],"_sufijotemporal");
+    }
+
+
+    /*Si se han itroducidos mas simbolos,o estados de los necesarios,llegados a este punto ya estan controlados*/
+
+
+
+    /*Inserto las transiciones de los nuevos estados*/
+    for(int j=0;j < p_afnd_destino->num_estados_actual;j++){  /* i equivale a offset */ /*fila*/
+        for(int k=0;k <  alfabeto_get_numSimbolosActual( p_afnd_destino->alfabeto) ;k++){/*columna*/
+            for(int l =0; l < p_afnd_destino->num_estados_actual;l++){  /*array de estados destino*/
+                  if( aux_hayTransicion(p_afnd_destino ,j, l ,p_afnd_destino->alfabeto->simbolos[k]) ){/*compruebo la m. del automata destino*/
+                    columna = AFNDIndiceDeSimbolo(p_afnd_origen,p_afnd_destino->alfabeto->simbolos[k]);
+                    p_afnd_origen->ftransicion[j + offset ][columna][l + offset] = 1;
+                  }
+            }
+
+        }
+
+    }
+
+    return p_afnd_destino;
+}
+
+
+
+
+/*Funcion auxiliar: true si en un automata puedes ir de un estado a otro,dado un simbolo no lambda*/
+/*util para ser llamada dentro de un bucle*/
+int aux_hayTransicion(AFND * p_afnd,int estado_origen, int estado_destino ,char * simbolo){
+    int indice_col;
+    indice_col  = AFNDIndiceDeSimbolo(p_afnd,simbolo); /*simbolo de entrada*/
+
+    
+    if(1 == p_afnd->ftransicion[estado_origen][indice_col][estado_destino]  ){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+
+AFND * AFND1OUneLTransicion(AFND * p_afnd_destino, AFND * p_afnd_origen,
+                             char * nombre_nuevo_estado_inicial, char * nombre_nuevo_estado_final){
+
+char cadena_aux[150];                                 
+
+if(NULL == p_afnd_destino || NULL == p_afnd_origen || NULL == nombre_nuevo_estado_inicial || NULL == nombre_nuevo_estado_final){
+        ERR("Error :Automata o nombre Nulo");
+        return NULL;
+    }
+
+    AFNDInsertaEstado(p_afnd_destino, nombre_nuevo_estado_inicial, INICIAL );
+    AFNDInsertaEstado(p_afnd_destino, nombre_nuevo_estado_final, FINAL );
+
+
+
+
+//localizamos los estados origen  y destino en el autonamta origen
+for(int i = 0; i < p_afnd_origen->num_estados_actual; i++){
+        if(estadoTipo(p_afnd_origen->estados[i]) == INICIAL){
+            strcpy(cadena_aux, p_afnd_origen->estados[i]->nombre) ;
+            strcat(cadena_aux, "_sufijotemporal");  
+            AFNDInsertaLTransicion( p_afnd_destino, nombre_nuevo_estado_inicial, cadena_aux );
+        }else if(estadoTipo(p_afnd_origen->estados[i]) == FINAL){
+            strcpy(cadena_aux, p_afnd_origen->estados[i]->nombre) ;
+            strcat(cadena_aux, "_sufijotemporal");
+            AFNDInsertaLTransicion( p_afnd_destino, cadena_aux, nombre_nuevo_estado_final );
+        }else if(estadoTipo(p_afnd_origen->estados[i]) == INICIAL_Y_FINAL){
+            /*Por ser inicial*/
+            strcpy(cadena_aux, p_afnd_origen->estados[i]->nombre) ;
+            strcat(cadena_aux, "_sufijotemporal");  
+            AFNDInsertaLTransicion( p_afnd_destino, nombre_nuevo_estado_inicial, cadena_aux );
+            /*Por ser final*/
+            strcpy(cadena_aux, p_afnd_origen->estados[i]->nombre) ;
+            strcat(cadena_aux, "_sufijotemporal");  
+            AFNDInsertaLTransicion( p_afnd_destino, cadena_aux, nombre_nuevo_estado_final );
+        }
+    }
+    AFNDCierraLTransicion(p_afnd_destino);
+    return p_afnd_destino;
+}
+
+
+
+
+
+
+AFND * AFNDAAFND1O(AFND * p_afnd){
+
+    AFND * p_afnd_2;
+
+    char cadena_aux[150];  
+    char cadena_aux_2[150]; 
+    //char cadena_aux_3[150]; 
+    if(NULL == p_afnd){
+        ERR("Error :Automata Nulo");
+        return NULL;
+    }
+
+    strcpy(cadena_aux, p_afnd->nombre);
+    strcat(cadena_aux, "_NOMBRE_AUX");  
+
+    p_afnd_2 = AFNDNuevo(cadena_aux,p_afnd->num_estados+2,p_afnd->num_simbolos);
+
+    AFND1OInsertaSimbolosAFND(p_afnd_2, p_afnd);
+    AFND1OInsertaEstadosTransicionesAFND(p_afnd, p_afnd_2, ""); //offset 0  
+    AFND1OUneLTransicion(p_afnd_2, p_afnd,"_i_1O", "_f_1O");
+  
+    return p_afnd_2;
+}
+
+
+
+
+AFND * AFND1OUne(AFND * p_afnd1O_1, AFND * p_afnd1O_2){
+    if(NULL == p_afnd1O_1 || NULL == p_afnd1O_2){
+        ERR("Error :Automata Nulo");
+        return NULL;
+    }
+
+
+
 
 
 
 }
-

@@ -53,7 +53,10 @@ Alfabeto * alfabetoInsertaSimbolo(Alfabeto * p_alfabeto, char * simbolo)
         strcpy(p_alfabeto->simbolos[len],simbolo);
         p_alfabeto->no_simbolos_actual++;
     }
-    else ERR("coleccion de simbolos lleno");
+    else{
+        ERR("coleccion de simbolos lleno");
+        return NULL;
+    } 
     return p_alfabeto;
 }
 
@@ -94,4 +97,11 @@ int alfabetoTamano(Alfabeto * p_alf)
     if (!p_alf) ERR("alfabeto is NULL");
 
     return p_alf->tamano;
+}
+
+
+int alfabeto_get_numSimbolosActual(Alfabeto * p_alf){
+    if (!p_alf) ERR("alfabeto is NULL");
+    return p_alf->no_simbolos_actual;
+
 }

@@ -51,6 +51,8 @@ void estadoImprime( FILE * fd, Estado * p_s)
         case NORMAL:
             fprintf(fd,"%s ",p_s->nombre);
             break;
+        default:
+            fprintf(fd,"HA OCURRIDO UN ERROR ");    
     }
 }
 
@@ -73,4 +75,31 @@ int estadoTipo(Estado * p_s)
 {
     if (!p_s) ERR("estado is NULL");
     return p_s->tipo;
+}
+
+/*Funciones auxiliares Practica 3*/
+
+/*Quita a un estado su prpiedad de Inicial,final o inicial-final*/
+void quitar_tipoIni_FinalEstado(Estado * p_s){
+    if (!p_s) ERR("estado is NULL");
+    p_s->tipo = NORMAL;
+}
+
+/*anniade un sufijo al nombre del estado*/
+void annide_sufijoEstado(Estado * p_s,char * sufijo){
+    
+    if (!p_s || sufijo == NULL) ERR("estado o sufijo es NULL");
+    free( p_s->nombre);
+    /* strcat(dest, src);*/
+    strcat(p_s->nombre, sufijo);
+}
+
+/*quita el sufijo al nombre del estado*/
+void quita_sufijoEstado(Estado * p_s,char * sufijo){
+    char * tmp;
+    if (!p_s || sufijo == NULL) ERR("estado o sufijo es NULL");
+    
+    tmp = strtok(p_s->nombre, sufijo);
+    free( p_s->nombre);
+    p_s->nombre = tmp;
 }

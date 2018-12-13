@@ -7,14 +7,22 @@
 #include "vector.h"
 #include "relacion.h"
 
+//Macros para la Practica 3
+/*Estas macros son necesarias para las funciones de crear un afnd a partir de un simbolo,lambda o el vacion*/
+#define MAX_SIZE_OF_ESTADOS 50
+#define MAX_SIZE_OF_SIMBOLOS 50
+
+
+
+
 typedef struct _AFND 
 {
     char * nombre;
     Alfabeto * alfabeto;
-    int num_estados;
+    int num_estados; /*numero de estados maximos que acepta el automata*/
     int num_estados_actual; /*numero de estados INSERTADOS en el afnd*/
     int num_estados_actuales_paralelos; /* num estados en los que se esta actualmente*/
-    int num_simbolos;
+    int num_simbolos; /*numero MAXIMO de simb. --> NO contabiliza los insertados*/
     Estado ** estados;
     Estado ** estado_actuales; /*  estados en los que se esta actualmente*/
     Palabra * cadena_actual;
@@ -66,7 +74,10 @@ AFND * AFND1OEstrella(AFND * p_afnd_origen);
 
 //Funciones auxiliares
 AFND * AFND1OInsertaSimbolosAFND(AFND * p_afnd_destino, AFND * p_afnd_origen);
-AFND * AFND1OInsertaEstadosTransicionesAFND(AFND * p_afnd_destino, AFND * p_afnd_origen, char * prefijo_estados, int offset_estados);
-AFND * AFND1OUneLTransicion(AFND * p_afnd_destino, AFND * p_afnd_origen, char * nombre_nuevo_estado_inicial, char * nombre_nuevo_estado_final, ....);
+AFND * AFND1OInsertaEstadosTransicionesAFND(AFND * p_afnd_destino, AFND * p_afnd_origen, char * prefijo_estados);
+AFND * AFND1OUneLTransicion(AFND * p_afnd_destino, AFND * p_afnd_origen, char * nombre_nuevo_estado_inicial, char * nombre_nuevo_estado_final);
+AFND * AFNDAAFND1O(AFND * p_afnd);
+
+int aux_hayTransicion(AFND * p_afnd,int estado_origen, int estado_destino ,char * simbolo);
 
 #endif //AFND_H
